@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>營造業企業管理專題 - 91035172</title>
+    <style>
+        :root { 
+            --bg-color: #F0F9FF;
+            --card-bg: #FFFFFF;
+            --primary-blue: #007799;
+            --light-blue-header: #CCEEFF;
+            --accent-blue: #00BBFF;
+            --accent-blue-dark: #0088A8;
+            --text-main: #0F172A;
+            --text-secondary: #475569;
+            --border-color: #77DDFF;
+            --nav-bg: rgba(204, 238, 255, 0.95);
+            --paper-bg: #FFFFFF;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #020617;
+            --card-bg: #0F172A;
+            --primary-blue: #77DDFF;
+            --text-main: #F1F5F9;
+            --text-secondary: #94A3B8;
+            --border-color: #0088A8;
+            --nav-bg: rgba(15, 23, 42, 0.95);
+            --paper-bg: #1E293B;
+        }
+
+        body { 
+            font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; 
+            margin: 0; background-color: var(--bg-color); 
+            color: var(--text-main); line-height: 1.6;
+            scroll-behavior: smooth; transition: background-color 0.4s;
+            overflow-x: hidden;
+        }
+
+        /* 5. 進度條 */
+        #scroll-progress {
+            position: fixed; top: 0; left: 0; width: 0%; height: 5px;
+            background: linear-gradient(to right, #77DDFF 0%, #33CCFF 50%, #007799 100%);
+            z-index: 10000;
+        }
+
+        /* 4. 回到頂端 */
+        #back-to-top {
+            position: fixed; bottom: 30px; right: 30px;
+            width: 50px; height: 50px; border-radius: 50%;
+            background: var(--primary-blue); color: white;
+            border: none; cursor: pointer; display: none;
+            align-items: center; justify-content: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 999;
+            transition: 0.3s;
+        }
+
+        header { 
+            background-color: var(--light-blue-header);
+            color: var(--007799); text-align: center; 
+            padding: 100px 20px; position: relative;
+            clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+        }
+        .user-info {
+            font-size: 1.1rem; font-weight: 600; color: var(--0088A8);
+            margin-bottom: 10px; opacity: 0.9;
+        }
+        .subtitle-top {
+            font-size: 1.5rem; letter-spacing: 5px; color: var(--accent-blue-dark);
+            margin-bottom: 10px; font-weight: bold;
+        }
+        .typewriter h1 {
+            font-size: 3rem; font-weight: 800; margin: 0 auto;
+            border-right: 4px solid var(--accent-blue);
+            white-space: nowrap; overflow: hidden;
+            animation: typing 3s steps(30, end), blink 0.7s step-end infinite;
+            max-width: fit-content;
+        }
+        @keyframes typing { from { width: 0 } to { width: 100% } }
+        @keyframes blink { from, to { border-color: transparent } 50% { border-color: var(--accent-blue); } }
+
+        .search-container {
+            max-width: 600px; margin: 30px auto 0; padding: 0 20px;
+        }
+        .search-input {
+            width: 100%; padding: 12px 20px; border-radius: 30px;
+            border: 2px solid var(--border-color); font-size: 1rem;
+            outline: none; transition: 0.3s;
+        }
+        .search-input:focus { border-color: var(--accent-blue); box-shadow: 0 0 10px rgba(51,204,255,0.3); }
+
+        .nav-bar {
+            background: var(--nav-bg); backdrop-filter: blur(15px); padding: 15px;
+            display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; position: sticky; top: 0; z-index: 1000;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .nav-item {
+            padding: 8px 16px; font-size: 0.95rem; font-weight: 600;
+            border-radius: 10px; transition: 0.3s; cursor: pointer;
+        }
+        .nav-item:hover { background: var(--light-blue-header); color: var(--007799); }
+
+        .list-container {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 30px; max-width: 1200px; margin: 40px auto; padding: 0 20px;
+        }
+        .vertical-card {
+            background: var(--card-bg); border-radius: 20px; overflow: hidden;
+            border: 1px solid var(--border-color); transition: 0.4s; cursor: pointer;
+            display: flex; flex-direction: column;
+        }
+        .vertical-card:hover {
+            transform: translateY(-10px); border-color: var(--accent-blue);
+            box-shadow: 0 20px 40px rgba(0,187,255,0.15);
+        }
+        .card-img-box { height: 200px; overflow: hidden; background: #eee; position: relative; }
+        .card-img-box img { width: 100%; height: 100%; object-fit: cover; }
+        .card-body { padding: 25px; flex-grow: 1; }
+        .card-body h3 { margin: 0 0 10px; font-size: 1.4rem; color: var(--007799); }
+
+        .reflection-card { border: 2px dashed var(--accent-blue); }
+        .reflection-card .card-img-box { 
+            background: linear-gradient(45deg, #33CCFF, #007799);
+            display: flex; align-items: center; justify-content: center; color: white;
+            font-size: 4rem;
+        }
+
+        /* 詳情頁 */
+        #detail-page { display: none; animation: fadeIn 0.5s ease; padding-bottom: 50px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .detail-hero { height: 450px; width: 100%; position: relative; overflow: hidden; }
+        .detail-hero img { width: 100%; height: 100%; object-fit: cover; }
+        .detail-hero::after { content: ""; position: absolute; bottom: 0; left: 0; width: 100%; height: 150px; background: linear-gradient(transparent, var(--bg-color)); }
+        
+        .detail-content-wrapper { max-width: 1100px; margin: -100px auto 0; position: relative; z-index: 10; padding: 0 20px; }
+        .detail-card { background: var(--card-bg); padding: 50px; border-radius: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); border: 1px solid var(--border-color); }
+        .section-title { border-left: 6px solid var(--accent-blue); padding-left: 15px; margin: 45px 0 25px; color: var(--007799); font-size: 1.6rem; }
+        
+        .projects-grid { display: grid; grid-template-columns: 1fr; gap: 25px; }
+        .project-item { background: #f8fafc; padding: 30px; border-radius: 20px; border-left: 4px solid var(--accent-blue-dark); transition: 0.3s; }
+        .project-item:hover { background: #f0f9ff; transform: translateX(5px); }
+        .project-item h4 { margin: 0 0 12px; font-size: 1.25rem; color: var(--0088A8); display: flex; align-items: center; gap: 10px; }
+        .project-item .tech-tag { font-size: 0.85rem; background: var(--light-blue-header); color: var(--007799); padding: 2px 10px; border-radius: 5px; font-weight: bold; margin-bottom: 10px; display: inline-block; }
+
+        /* 心得頁優化 - 固定一頁可視區 */
+        #reflection-page { 
+            display: none; position: relative; 
+            height: 100vh; width: 100vw; overflow: hidden;
+            background: var(--bg-color); 
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        #fireworks-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+        
+        .notebook {
+            width: 90%; max-width: 750px; height: auto; max-height: 85vh;
+            background: var(--paper-bg); padding: 40px 50px; border-radius: 5px; 
+            position: relative; z-index: 5;
+            box-shadow: 5px 5px 20px rgba(0,0,0,0.1), 0 0 0 1px #ddd;
+            display: flex; flex-direction: column;
+        }
+        .notebook::before {
+            content: ""; position: absolute; top: 0; left: 30px; width: 2px; height: 100%;
+            background: rgba(255, 100, 100, 0.3);
+        }
+        .notebook-lines {
+            background-image: linear-gradient(#e5e7eb 1px, transparent 1px);
+            background-size: 100% 1.8rem; line-height: 1.8rem;
+            overflow: hidden; flex-grow: 1; margin: 10px 0;
+        }
+        #reflection-text { font-size: 1.05rem; text-align: justify; color: var(--text-main); }
+        
+        #blessing-text { 
+            position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+            font-size: 2.5rem; color: var(--007799); font-weight: 800; text-align: center;
+            z-index: 10; display: none; 
+            animation: bounceIn 0.8s cubic-bezier(0.36, 0, 0.66, -0.56) infinite alternate, fadeInText 0.5s ease-out;
+            text-shadow: 0 2px 10px rgba(255,255,255,0.8);
+        }
+        @keyframes fadeInText { from { opacity: 0; transform: translate(-50%, -20px); } to { opacity: 1; transform: translate(-50%, 0); } }
+        @keyframes bounceIn { from { transform: translate(-50%, 0) scale(1); } to { transform: translate(-50%, 0) scale(1.15); } }
+
+        .disclaimer {
+            font-size: 0.7rem; color: var(--text-secondary); text-align: center;
+            padding: 10px; margin-top: 15px; border-top: 1px dashed var(--border-color);
+            opacity: 0.7; width: 100%;
+        }
+
+        .btn { padding: 10px 24px; border-radius: 12px; font-weight: 700; border: none; cursor: pointer; transition: 0.3s; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-primary { background: var(--primary-blue); color: white; }
+        .btn-accent { background: var(--accent-blue); color: white; }
+        .btn-gold { background: #FFD700; color: #856404; }
+        .btn:hover { transform: translateY(-3px); filter: brightness(1.1); }
+
+    </style>
+</head>
+<body>
+
+    <div id="scroll-progress"></div>
+    <button id="back-to-top">▲</button>
+
+    <!-- 首頁 -->
+    <div id="index-page">
+        <header>
+            <div class="user-info">進修四技企業管理系2A | 學號：91035172</div>
+            <div class="subtitle-top">「網際網路與 AI 應用」</div>
+            <div class="typewriter"><h1>營造企業管理實務專題</h1></div>
+            <p style="margin-top:15px; font-weight: 500; color: var(--007799);">精選五大標竿企業，深度解析營建科技與管理佈局</p>
+            
+            <div class="search-container">
+                <input type="text" id="company-search" class="search-input" placeholder="搜尋企業名稱或關鍵字..." oninput="handleSearch()">
+            </div>
+        </header>
+
+        <nav class="nav-bar">
+            <div class="nav-item" onclick="showDetail('ctci')">中鼎工程</div>
+            <div class="nav-item" onclick="showDetail('cec')">大陸工程</div>
+            <div class="nav-item" onclick="showDetail('obayashi')">大林組</div>
+            <div class="nav-item" onclick="showDetail('kajima')">中鹿營造</div>
+            <div class="nav-item" onclick="showDetail('tachen')">大成工程</div>
+            <div class="nav-item" style="color:var(--accent-blue-dark)" onclick="showReflection()">📔 專題心得</div>
+        </nav>
+
+        <div class="list-container" id="main-list"></div>
+
+        <div class="disclaimer">
+            免責聲明：本網站為課堂作業與學習用途，所使用之企業名稱、LOGO、圖片及相關資訊皆屬原權利人所有，僅作非營利學術展示。如有侵權請來信告知將立即移除。
+        </div>
+    </div>
+
+    <!-- 詳情頁 -->
+    <div id="detail-page">
+        <div class="detail-hero"><img id="detail-img" src=""></div>
+        <div class="detail-content-wrapper">
+            <div class="detail-card">
+                <h1 id="detail-name" style="margin:0; font-size: 2.8rem; color: var(--007799);"></h1>
+                <p id="detail-subtitle" style="color:var(--accent-blue-dark); font-size:1.2rem; font-weight:bold; margin-top:5px;"></p>
+                
+                <h3 class="section-title">🏗️ 經營管理核心</h3>
+                <p id="detail-core" style="text-align: justify; line-height: 1.8; font-size: 1.05rem;"></p>
+
+                <h3 class="section-title">🏢 特色工程與技術亮點</h3>
+                <div id="detail-projects" class="projects-grid"></div>
+
+                <div style="margin-top:45px; background: linear-gradient(135deg, var(--primary-blue), var(--accent-blue-dark)); color:white; padding:40px; border-radius:25px; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
+                    <h4 style="margin-top:0; color:#CCEEFF; font-size: 1.4rem;">🌱 ESG 永續願景與數位轉型</h4>
+                    <p id="detail-vision" style="margin-bottom:0; font-size: 1.05rem;"></p>
+                </div>
+
+                <div style="margin-top:50px; text-align:center; display:flex; gap:20px; justify-content:center; flex-wrap: wrap;">
+                    <button class="btn btn-primary" onclick="goHome()">🏠 返回首頁</button>
+                    <a id="detail-url" href="#" target="_blank" class="btn btn-accent">🌐 前往官方網站</a>
+                </div>
+
+                <div class="disclaimer">
+                    免責聲明：本網站為課堂作業與學習用途，所使用之企業名稱、LOGO、圖片及相關資訊皆屬原權利人所有，僅作非營利學術展示。如有侵權請來信告知將立即移除。
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 心得頁 -->
+    <div id="reflection-page">
+        <canvas id="fireworks-canvas"></canvas>
+        <div id="blessing-text">新年快樂 🎆</div>
+        <div class="notebook">
+            <h2 style="border-bottom: 3px solid var(--accent-blue); display: inline-block; padding-bottom: 5px; margin-top: 0; color: var(--007799); font-size: 1.5rem;">專題學習心得</h2>
+            <div class="notebook-lines">
+                <div id="reflection-text"></div>
+            </div>
+            
+            <div style="margin-top:20px; text-align: center; display: flex; gap: 15px; justify-content: center; position: relative; z-index: 10;">
+                <button class="btn btn-primary" onclick="goHome()">🏠 返回首頁</button>
+                <button class="btn btn-gold" id="thanks-btn" onclick="sayThanks()">✨ 謝謝老師</button>
+            </div>
+
+            <div class="disclaimer">
+                免責聲明：本網站為課堂作業與學習用途，所使用之企業名稱、LOGO、圖片及相關資訊皆屬原權利人所有，僅作非營利學術展示。如有侵權請來信告知將立即移除。
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const companyData = {
+            'ctci': { 
+                name: '中鼎工程 (CTCI)', 
+                subtitle: '全球統包工程 (EPC) 領航者', 
+                url: 'https://www.ctci.com/', 
+                homeImg: '0021.png', 
+                detailImg: '0022.png',
+                desc: '國際級工程集團，專精於煉油石化、能源及環境工程，具備全球採購優勢。', 
+                core: '中鼎集團以「誠信、團隊、專業、創新」為核心價值，是台灣唯一能與國際營造大廠並駕齊驅的統包工程商。其管理核心在於「數位轉型」與「全球整合」。中鼎建立了一套先進的 iEPC 數位平台，將全球分佈的設計（Engineering）、採購（Procurement）、施工（Construction）到移交過程數據化，利用大數據分析預測潛在風險。其管理範疇涵蓋全球多國，強大的供應鏈管理系統確保了在動盪市場中仍能精確掌控成本與工期，維持高品質產出。', 
+                vision: '推動「綠色統包（Green EPC）」，透過數位建模優化材料配置，減少 30% 以上的施工浪費，並積極開發氫能、碳捕捉等前瞻技術。', 
+                projects: [
+                    { title: '台積電美國亞利桑那州廠', tag: '高科技廠房', desc: '為台灣半導體龍頭進行海外設廠支持，需克服台美法規差異與跨國勞動力協調，應用 iEPC 技術實現異地即時監控管理。' },
+                    { title: '林口電廠擴建工程', tag: '能源設施', desc: '管理核心為「超超臨界發電技術」設備安裝，涉及數萬噸鋼構與極高溫高壓管道焊接，施工過程採用無人機巡檢以確保零職災。' },
+                    { title: '桃園中壢水資源中心', tag: '環境工程', desc: '技術重點在於 MBR 膜過濾系統整合，管理上需在都市密集區進行大規模開挖且不干擾居民生活，展現極高的環保與社會責任。' }
+                ]
+            },
+            'cec': { 
+                name: '大陸工程 (CEC)', 
+                subtitle: '台灣土木軌道運輸之指標', 
+                url: 'https://www.continental-engineering.com/', 
+                homeImg: '0031.png', 
+                detailImg: '0032.png',
+                desc: '在橋樑、隧道及軌道建設擁有深厚基石，近年更在高端住宅建築屢創佳績。', 
+                core: '大陸工程的管理哲學奠基於「標準化作業」與「預見風險」。作為台灣土木建築的先驅，其管理重點在於建立跨國技術合作網，將歐美與日本的先進隧道挖掘技術引入台灣。大陸工程高度重視 BIM（建築資訊模型）的深度應用，不僅在設計階段進行碰撞檢查，更將其延伸至施工進度管控。其專案團隊強調「細部品質優化」，透過內部嚴謹的查核系統，在超高難度的隧道與軌道標案中，仍能維持極高的安全係數與結構精度。', 
+                vision: '透過 4D 施工模擬優化施工動線，縮短工期並降低重機械運行產生的碳排，目標於 2050 年實現建築全生命週期減碳。', 
+                projects: [
+                    { title: '台灣高鐵 C260 標案', tag: '大跨度橋樑', desc: '難點在於橫跨極端地形的長大跨徑橋樑吊裝，管理上採用同步千斤頂頂升與高精度應變監測，確保橋樑合攏誤差在毫米級。' },
+                    { title: '捷運萬大線隧道段', tag: '潛盾技術', desc: '在老舊市區地底進行潛盾挖掘，技術重點為地層改良與即時地表沉陷監控，管理目標是確保周邊建物與民生管線毫髮無傷。' },
+                    { title: '台中歌劇院 (土木結構)', tag: '特殊鋼筋混凝土', desc: '挑戰全球唯一的「曲面牆」工法，技術亮點在於複雜模板的計算與高流動混凝土澆置，成功將不可能的建築草稿實體化。' }
+                ]
+            },
+            'obayashi': { 
+                name: '大林組 (Obayashi)', 
+                subtitle: '日本五大營造廠之職人工藝', 
+                url: 'https://www.obayashi.com.tw/', 
+                homeImg: '0041.png', 
+                detailImg: '0042.png',
+                desc: '以「安全至上」與「技術創新」聞名，將日系嚴謹工法引進台灣重大建設。', 
+                core: '大林組（Obayashi）身為日本「超級營建五巨頭」之一，其管理核心在於「大林組標準」的嚴苛落實。其管理特色在於細節的極致追求，強調「整理、整頓、清掃、清潔、素養（5S）」與工地自動化。大林組投入大量資源於 R&D，開發出多項專利阻尼工法與自動化施工機器人。在台灣的分支機構完美承襲了母公司的職人精神，透過「現地巡檢」與「即時數據回傳」機制，將人為誤差降至最低，確保每項工程都能經得起時間的考驗。', 
+                vision: '研發「低碳環保混凝土」與「木造高層建築」技術，並推動營造現場全面自動化，以應對少子化與高齡化產生的勞動力短缺。', 
+                projects: [
+                    { title: '台北101大樓 (JV合作)', tag: '超高層結構', desc: '技術難點在於高空巨型鋼構吊運與防震阻尼系統整合，管理重點是建立跨國供應鏈與嚴密的垂直運輸管理，確保超高空作業安全。' },
+                    { title: '市府轉運站 BOT 案', tag: '複合式商辦', desc: '難點在於信義區心臟地帶的交通維持與深開挖，技術亮點是利用逆打工法縮短工期，並確保地鐵站體運作不受工程影響。' },
+                    { title: '高鐵台中車站', tag: '大跨度鋼構', desc: '展現日系精確工藝，重點在於巨型屋頂結構的耐風壓與熱脹冷縮適配，管理上採用精密測量儀器追蹤鋼構受熱變位情況。' }
+                ]
+            },
+            'kajima': { 
+                name: '中鹿營造 (Kajima)', 
+                subtitle: '台灣最受推崇的日系精緻品牌', 
+                url: 'https://www.kajima.com.tw/', 
+                homeImg: '0051.png', 
+                detailImg: '0052.png',
+                desc: '傳承日本鹿島建設之專業，深受國內高端商辦與頂級住宅案之青睞。', 
+                core: '中鹿營造的核心競爭力在於「設計與施工的高度一體化」。中鹿在專案初期即導入施工可行性評估，藉此大幅減少工程變更。其管理強調「精緻化工法」，特別是在機電整合與室內工藝銜接上，擁有領先業界的精度。中鹿引進日本鹿島建設的「品質自主檢查系統」，讓基層員工也能具備高度的品質責任意識。這種從細節出發的管理文化，讓其在高端住宅、頂級辦公大樓與高科技無塵室廠房領域，建立了極高的品牌忠誠度與技術門檻。', 
+                vision: '提倡「建築長壽命化」，透過模組化設計讓未來維修與更新更為簡便，並推動建築內部空氣品質與採光的健康管理（WELL）。', 
+                projects: [
+                    { title: '統一國際大樓', tag: '頂級商辦', desc: '重點在於鋼骨結構與帷幕牆的對接精度，管理上實施嚴格的防漏水測試，技術亮點是採用高強度鋼材以減少室內柱位佔比。' },
+                    { title: '和平大苑 (高端豪宅)', tag: '豪宅工法', desc: '難點在於複雜石材拼花與多種異材質銜接，管理重點是將藝術設計精準轉化為施工圖，確保視覺美學與結構強度完美平衡。' },
+                    { title: '高精密半導體廠區', tag: '微振控制', desc: '技術核心是「微震動控制」與「潔淨室環境管理」，管理上需執行嚴格的人員進出落塵管控與氣流循環監測。' }
+                ]
+            },
+            'tachen': { 
+                name: '大成工程', 
+                subtitle: '全方位大型公共與民生建設專才', 
+                url: 'https://www.ta-chen.com.tw/', 
+                homeImg: '0061.png', 
+                detailImg: '0062.png',
+                desc: '在地深耕的大型甲級營造廠，於大型商場與專業物流中心領域具領先地位。', 
+                core: '大成工程的管理特點在於其強大的「在地應變能力」與「本土資源整合能力」。作為台灣老牌的甲級營造廠，大成在大型商業設施（如購物中心）與智慧物流倉儲具備卓越的實戰經驗。其管理團隊擅長協調複雜的機電與空調介面，並針對台灣本土勞動力市場進行優化配置。近年來，大成工程積極引進「智慧工地監控系統」，將傳統工地巡檢與手持設備結合，提升了現場管理效率與物料追蹤的透明度，成功從傳統營造向智慧化管理轉型。', 
+                vision: '推動「綠色工地巡檢」，全面廢除紙本表單，並優先採購在地建材以減少長途運輸碳排，同時致力於提升工地廢棄物回收率。', 
+                projects: [
+                    { title: '佛光山佛陀紀念館', tag: '宗教藝文建築', desc: '難點在於巨大空間的圓型屋頂結構與眾多藝術裝修介接，管理重點是跨領域整合藝術家、結構技師與施工團隊的意見。' },
+                    { title: '南紡購物中心', tag: '大型商業複合體', desc: '技術重點是大型商場的機電與空調負載分配，管理上需協調數百家進駐櫃位的裝修銜接，並確保公共空間安全無虞。' },
+                    { title: '新市自動化物流中心', tag: '高精度物流', desc: '核心在於「超平整地坪工法（Super Flat Floor）」，管理上需在澆置時進行即時雷射量測，以滿足自動化導航車（AGV）的運行需求。' }
+                ]
+            }
+        };
+
+        const reflectionContent = `這門課原本是因為我降轉的關係才有機會接觸到，但也因此讓我學到很多以前沒有接觸過的內容。尤其現在 AI 技術越來越進步，很多科技工具都能幫助我們更有效率地學習、整理資料與完成作品，讓我覺得能善用科技來學習真的很棒，也讓我對未來的學習更有興趣。在課程的過程中，我也發現網站不只是呈現資訊而已，更能建立公司形象與專業感。比較可惜的是這門課的時間有點少，如果能再多一些時間，我也想做一個更完整、屬於公司專屬的企業網站，讓整體內容更豐富、更有真正企業網站的感覺。總結來說，這堂課雖然時間不長，但讓我收穫很多，也讓我對網頁設計與科技應用有更大的期待。`;
+
+        let isFireworksRunning = false;
+
+        function handleSearch() {
+            renderList();
+        }
+
+        function renderList() {
+            const query = document.getElementById('company-search').value.toLowerCase();
+            let container = document.getElementById('main-list');
+            let html = '';
+            let filteredKeys = Object.keys(companyData).filter(id => 
+                companyData[id].name.toLowerCase().includes(query) || 
+                companyData[id].desc.toLowerCase().includes(query)
+            );
+
+            if (filteredKeys.length === 0 && query !== "") {
+                container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 50px; color: var(--text-secondary); font-size: 1.2rem;">🔍 找不到符合「${query}」的企業...</div>`;
+                return;
+            }
+            
+            filteredKeys.forEach(id => {
+                html += `
+                    <div class="vertical-card" onclick="showDetail('${id}')">
+                        <div class="card-img-box">
+                            <img src="${companyData[id].homeImg}" onerror="this.src='https://via.placeholder.com/400x300?text=Logo+Image'">
+                        </div>
+                        <div class="card-body">
+                            <h3>${companyData[id].name}</h3>
+                            <p>${companyData[id].desc}</p>
+                            <span style="color:var(--accent-blue-dark); font-weight:bold;">深度解析 →</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            if (query === "") {
+                html += `
+                    <div class="vertical-card reflection-card" onclick="showReflection()">
+                        <div class="card-img-box">📝</div>
+                        <div class="card-body">
+                            <h3>專題學習心得</h3>
+                            <p>關於本次營造專題的研究感悟、AI 科技應用的學習收穫，以及對未來的展望。</p>
+                            <span style="color:var(--accent-blue-dark); font-weight:bold;">點擊閱讀完整心得 →</span>
+                        </div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        function showDetail(id) {
+            let d = companyData[id];
+            document.getElementById('detail-name').innerText = d.name;
+            document.getElementById('detail-subtitle').innerText = d.subtitle;
+            document.getElementById('detail-img').src = d.detailImg;
+            document.getElementById('detail-core').innerText = d.core;
+            document.getElementById('detail-vision').innerText = d.vision;
+            document.getElementById('detail-url').href = d.url;
+            document.getElementById('detail-projects').innerHTML = d.projects.map(p => `
+                <div class="project-item">
+                    <span class="tech-tag">${p.tag}</span>
+                    <h4>🔹 ${p.title}</h4>
+                    <p style="margin:0; font-size: 0.95rem; color: var(--text-secondary);">${p.desc}</p>
+                </div>
+            `).join('');
+
+            document.getElementById('index-page').style.display = 'none';
+            document.getElementById('reflection-page').style.display = 'none';
+            document.getElementById('detail-page').style.display = 'block';
+            window.scrollTo(0,0);
+        }
+
+        function typeWriter(text, elementId, speed = 40) {
+            let i = 0;
+            const element = document.getElementById(elementId);
+            element.innerText = "";
+            function type() {
+                if (i < text.length) {
+                    element.innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(type, speed);
+                }
+            }
+            type();
+        }
+
+        function showReflection() {
+            document.getElementById('index-page').style.display = 'none';
+            document.getElementById('detail-page').style.display = 'none';
+            document.getElementById('reflection-page').style.display = 'flex';
+            document.getElementById('blessing-text').style.display = 'none';
+            stopFireworks();
+            typeWriter(reflectionContent, 'reflection-text');
+            window.scrollTo(0,0);
+        }
+
+        function sayThanks() {
+            document.getElementById('blessing-text').style.display = 'block';
+            if (!isFireworksRunning) {
+                startFireworks();
+            }
+        }
+
+        function goHome() {
+            // 1. 清空搜尋框輸入值
+            document.getElementById('company-search').value = "";
+            // 2. 重新渲染完整列表
+            renderList();
+            // 3. 停止煙火並切換頁面
+            stopFireworks();
+            document.getElementById('detail-page').style.display = 'none';
+            document.getElementById('reflection-page').style.display = 'none';
+            document.getElementById('index-page').style.display = 'block';
+            // 4. 回到頂端
+            window.scrollTo(0,0);
+        }
+
+        // --- 煙火動畫邏輯 ---
+        let canvas, ctx, animationId;
+        function startFireworks() {
+            isFireworksRunning = true;
+            canvas = document.getElementById('fireworks-canvas');
+            ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            let particles = [];
+            class Particle {
+                constructor(x, y, color) {
+                    this.x = x; this.y = y; this.color = color;
+                    this.velocity = { x: (Math.random() - 0.5) * 8, y: (Math.random() - 0.5) * 8 };
+                    this.alpha = 1; this.friction = 0.95;
+                }
+                draw() {
+                    ctx.globalAlpha = this.alpha;
+                    ctx.beginPath(); ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+                    ctx.fillStyle = this.color; ctx.fill();
+                }
+                update() {
+                    this.velocity.x *= this.friction; this.velocity.y *= this.friction;
+                    this.x += this.velocity.x; this.y += this.velocity.y;
+                    this.alpha -= 0.01;
+                }
+            }
+
+            function animate() {
+                if (!isFireworksRunning) return;
+                animationId = requestAnimationFrame(animate);
+                ctx.fillStyle = 'rgba(240, 249, 255, 0.15)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                if (Math.random() < 0.06) {
+                    const x = Math.random() * canvas.width;
+                    const y = Math.random() * (canvas.height * 0.7);
+                    const color = `hsl(${Math.random() * 360}, 70%, 50%)`;
+                    for (let i = 0; i < 45; i++) particles.push(new Particle(x, y, color));
+                }
+
+                particles.forEach((p, i) => {
+                    if (p.alpha <= 0) particles.splice(i, 1);
+                    else { p.update(); p.draw(); }
+                });
+            }
+            animate();
+        }
+
+        function stopFireworks() { 
+            isFireworksRunning = false;
+            cancelAnimationFrame(animationId); 
+            animationId = null; 
+            if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        window.onscroll = () => {
+            let winScroll = document.documentElement.scrollTop;
+            let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            let progress = document.getElementById("scroll-progress");
+            if (progress) progress.style.width = (winScroll / height * 100) + "%";
+            
+            let btt = document.getElementById("back-to-top");
+            if (btt) btt.style.display = winScroll > 300 ? "flex" : "none";
+        };
+
+        document.getElementById("back-to-top").onclick = () => window.scrollTo({top:0, behavior:'smooth'});
+
+        window.onload = renderList;
+    </script>
+</body>
+</html>
